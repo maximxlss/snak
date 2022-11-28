@@ -4,20 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.xls.snak.utils.Direction;
 
 public class SnakWrapper {
     Texture snake_graphics_img;
-    Array<TextureRegion> snake_graphics;
+    Array<TextureRegion> snake_tiles;
+    TextureRegion game_over;
     SnakLogic logic;
     short last_pressed_dir = -1;
     float timer = 0;
@@ -29,14 +27,15 @@ public class SnakWrapper {
 
     public SnakWrapper(boolean wrapping, int width, int height) {
         snake_graphics_img = new Texture("snake-graphics.png");
-        snake_graphics = new Array<>();
-        snake_graphics.add(new TextureRegion(snake_graphics_img, 0, 0, 0, 0));
-        snake_graphics.add(new TextureRegion(snake_graphics_img, 16 * 0, 0, 16, 16));
-        snake_graphics.add(new TextureRegion(snake_graphics_img, 16 * 1, 0, 16, 16));
-        snake_graphics.add(new TextureRegion(snake_graphics_img, 16 * 2, 0, 16, 16));
-        snake_graphics.add(new TextureRegion(snake_graphics_img, 16 * 3, 0, 16, 16));
-        snake_graphics.add(new TextureRegion(snake_graphics_img, 16 * 4, 0, 16, 16));
-        snake_graphics.add(new TextureRegion(snake_graphics_img, 16 * 5, 0, 16, 16));
+        snake_tiles = new Array<>();
+        snake_tiles.add(null);
+        snake_tiles.add(new TextureRegion(snake_graphics_img, 1, 1, 16, 16));
+        snake_tiles.add(new TextureRegion(snake_graphics_img, 18, 1, 16, 16));
+        snake_tiles.add(new TextureRegion(snake_graphics_img, 34, 1, 16, 16));
+        snake_tiles.add(new TextureRegion(snake_graphics_img, 52, 1, 16, 16));
+        snake_tiles.add(new TextureRegion(snake_graphics_img, 69, 1, 16, 16));
+        snake_tiles.add(new TextureRegion(snake_graphics_img, 87, 1, 16, 16));
+        game_over = new TextureRegion(snake_graphics_img, 1, 19, 99, 16);
         Pixmap pix = new Pixmap(width, height, Pixmap.Format.RGBA8888);
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++) {
@@ -83,16 +82,27 @@ public class SnakWrapper {
         }
     }
 
-    public void render(SpriteBatch batch) {
+    public void render(SpriteBatch batch, float x, float y, float width, float height) {
         timer += Gdx.graphics.getDeltaTime();
         if (timer >= move_time) {
             Move();
             timer = 0;
         }
-        batch.draw(checkerboard, 0, 0, 800, 800);
-        logic.render(batch, 0, 0, 800, 800, snake_graphics);
+        batch.draw(checkerboard, x, y, width, height);
+        logic.render(batch, x, y, width, height, snake_tiles);
         font.getData().setScale(7, 7);
         font.draw(batch, String.valueOf(logic.GetScore()), 5, 75);
+        if (logic.IsGameOver()) {
+            float middle_x = x + width / 2;
+            float middle_y = y + height / 2;
+            float msg_scale = width / game_over.getRegionWidth() * 0.75f;
+            batch.draw(game_over,
+                    middle_x - game_over.getRegionWidth() * msg_scale / 2,
+                    middle_y - game_over.getRegionHeight() * msg_scale / 2,
+                    game_over.getRegionWidth() * msg_scale,
+                    game_over.getRegionHeight() * msg_scale);
+        }
+
     }
 
     public void dispose() {
