@@ -4,8 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Queue;
-import com.xls.utils.Direction;
-import org.jetbrains.annotations.NotNull;
+import com.xls.snak.utils.Direction;
 
 import java.util.Random;
 
@@ -22,6 +21,7 @@ public class SnakLogic {
     private int head_y;
 
     private boolean game_over;
+    private long score;
 
     public SnakLogic(boolean wrapping, int width, int height) {
         this(wrapping, width, height, null);
@@ -59,8 +59,8 @@ public class SnakLogic {
     public void SpawnFruit() {
         int x, y;
         do {
-            x = randgen.nextInt(0, board.length);
-            y = randgen.nextInt(0, board[0].length);
+            x = randgen.nextInt(board.length);
+            y = randgen.nextInt(board[0].length);
         } while (board[x][y] != TileType.Empty);
 
         board[x][y] = TileType.Fruit;
@@ -149,23 +149,31 @@ public class SnakLogic {
             board_orient[tail_x][tail_y] = snake.first();
 
             return Event.None;
-        } else
+        } else {
+            score++;
             return Event.AteFruit;
+        }
     }
 
     public short[][] GetBoard() {
         return board;
     }
 
+    public long GetScore() {
+        return score;
+    }
+
     public boolean IsGameOver() {
         return game_over;
     }
 
-    public void render(@NotNull SpriteBatch batch, float x, float y, float width, float height, @NotNull Array<TextureRegion> textures) {
+    public void render(SpriteBatch batch, float x, float y, float width, float height, Array<TextureRegion> textures) {
         float tile_width = width / board.length;
         float tile_height = height / board[0].length;
         for (int tx = 0; tx < board.length; tx++)
             for (int ty = 0; ty < board[0].length; ty++) {
+                if (board[tx][ty] == TileType.Empty)
+                    continue;
                 float tile_x = x + tile_width * tx;
                 float tile_y = y + tile_height * ty;
                 short tile_type = board[tx][ty];

@@ -1,4 +1,4 @@
-package com.xls.utils;
+package com.xls.snak.utils;
 
 public class Direction {
     public static final short Up = 0, Right = 1, Down = 2, Left = 3;
