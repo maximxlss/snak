@@ -18,7 +18,6 @@ public class SnakGame extends StateManager {
 	@Override
 	public void create() {
 		super.create();
-		states.add(new SinglePlayer());
-		currentState = states.get(0);
+		currentState = new Menu();
 	}
 }

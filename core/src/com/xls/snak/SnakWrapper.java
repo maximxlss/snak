@@ -3,6 +3,7 @@ package com.xls.snak;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,6 +12,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.xls.snak.utils.Direction;
+import com.xls.snak.utils.StateManager;
+
+import javax.swing.plaf.nimbus.State;
 
 public class SnakWrapper {
     Texture snake_graphics_img;
@@ -53,6 +57,8 @@ public class SnakWrapper {
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
+                if (logic.IsGameOver())
+                    StateManager.currentState = new Menu();
                 switch (keycode) {
                     case Input.Keys.UP:
                         last_pressed_dir = Direction.Up;
@@ -79,6 +85,15 @@ public class SnakWrapper {
         switch (e) {
             case AteFruit:
                 logic.SpawnFruit();
+                break;
+            case GameOver:
+                if (StateManager.data_store.highscore < logic.GetScore()) {
+                    StateManager.data_store.highscore = logic.GetScore();
+                    Preferences prefs = Gdx.app.getPreferences("highscore");
+                    prefs.putLong("score", StateManager.data_store.highscore);
+                    prefs.flush();
+                }
+                break;
         }
     }
 
